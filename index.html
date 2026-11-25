@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portugais et Anglais en famille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one narrow column, big touch targets, azulejo blue + sun yellow */
+:root{
+  --bg:#f3f6fb; --card:#ffffff; --ink:#14233d; --muted:#5b6b86;
+  --accent:#1f4fd8; --accent-ink:#ffffff; --sun:#f5b21b;
+  --good:#1a8f55; --bad:#c9372c; --line:#d6dff0;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Figtree",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1626; --card:#16213a; --ink:#e8eefb; --muted:#9aa9c6; --accent:#6f95ff; --accent-ink:#0e1626;
+    --sun:#f5b21b; --good:#4cc78a; --bad:#ff7b6e; --line:#2a3a5c; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1626; --card:#16213a; --ink:#e8eefb; --muted:#9aa9c6; --accent:#6f95ff; --accent-ink:#0e1626;
+  --sun:#f5b21b; --good:#4cc78a; --bad:#ff7b6e; --line:#2a3a5c; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.45}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:2rem;font-weight:800;line-height:1.1}
+h2{font-size:1.4rem;font-weight:800}
+p{margin:0}
+.muted{color:var(--muted);font-size:.95rem}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.back{background:none;border:0;color:var(--accent);font-weight:700;padding:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.langs{display:grid;gap:12px}
+.lang{display:flex;align-items:center;gap:16px;text-align:left;width:100%;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px}
+.lang:hover{border-color:var(--accent)}
+.badge{flex:none;width:52px;height:52px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.2rem}
+.lang b{display:block;font-family:var(--display);font-size:1.4rem}
+.lvl{display:inline-block;background:var(--sun);color:#14233d;border-radius:8px;padding:1px 8px;font-weight:700;font-size:.85rem;margin-left:6px;vertical-align:middle}
+.bar{display:block;height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--good);border-radius:99px}
+.modes{display:grid;gap:10px}
+.mode{display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:16px 18px}
+.mode b{font-family:var(--display);font-size:1.2rem}
+.mode span{opacity:.9;font-size:.95rem}
+.mode.alt{background:var(--card);color:var(--ink);border:2px solid var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:#14233d}
+.chip:disabled{opacity:.55;cursor:not-allowed}
+.flash{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;width:100%;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:24px}
+.flash .big{font-family:var(--display);font-size:2rem;font-weight:800;text-wrap:balance}
+.flash .tap{color:var(--muted);font-size:.9rem}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+.btn{border:0;border-radius:12px;padding:14px 16px;font-weight:700;background:var(--accent);color:var(--accent-ink)}
+.btn.good{background:var(--good);color:#fff}
+.btn.bad{background:var(--bad);color:#fff}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.speak{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--accent);background:none;color:var(--accent);border-radius:99px;padding:8px 16px;font-weight:700}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:14px 16px;font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 18%,var(--card))}
+.opt.ko{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card))}
+.prompt{font-family:var(--display);font-size:1.7rem;font-weight:800;text-wrap:balance}
+.score{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--accent)}
+.prog{font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.note{background:color-mix(in srgb,var(--sun) 22%,var(--card));border-radius:12px;padding:10px 14px;font-size:.95rem}
+.note.up{background:color-mix(in srgb,var(--good) 22%,var(--card));font-weight:700}
+.field{width:100%;border:2px solid var(--line);background:var(--card);border-radius:12px;padding:14px 16px;font-size:1.1rem}
+.field.ok{border-color:var(--good)} .field.ko{border-color:var(--bad)}
+.addrow{display:flex;gap:8px}
+.addrow .field{flex:1;min-width:0;padding:10px 14px}
+.addrow .btn{padding:10px 16px;flex:none}
+.kind{display:inline-block;font-size:.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+"use strict";
+/* ---------- Contenu : [français, langue cible] par thème, rangé par niveau ---------- */
+const DATA = {
+  pt: { label:"Português", short:"PT", voice:"pt-PT", sub:"Portugais du Portugal", levels:[
+    {tag:"A1", cats:[
+      {id:"salut", fr:"Salutations", items:[["Bonjour","Bom dia"],["Bon après-midi","Boa tarde"],["Bonsoir / Bonne nuit","Boa noite"],["Salut","Olá"],["Au revoir","Adeus"],["À tout à l'heure","Até logo"],["Merci (dit par un homme)","Obrigado"],["Merci (dit par une femme)","Obrigada"],["S'il vous plaît","Por favor"],["Excusez-moi","Desculpe"],["De rien","De nada"],["Comment allez-vous ?","Como está?"]]},
+      {id:"nombres", fr:"Nombres", items:[["un","um"],["deux","dois"],["trois","três"],["quatre","quatro"],["cinq","cinco"],["six","seis"],["sept","sete"],["huit","oito"],["neuf","nove"],["dix","dez"],["vingt","vinte"],["cent","cem"]]},
+      {id:"famille", fr:"Famille", items:[["la mère","a mãe"],["le père","o pai"],["le frère","o irmão"],["la sœur","a irmã"],["le fils","o filho"],["la fille","a filha"],["la grand-mère","a avó"],["le grand-père","o avô"],["le mari","o marido"],["la femme (épouse)","a mulher"],["l'ami","o amigo"],["l'enfant","a criança"]]},
+      {id:"manger", fr:"Manger et boire", items:[["le pain","o pão"],["l'eau","a água"],["le lait","o leite"],["le café","o café"],["le fromage","o queijo"],["la viande","a carne"],["le poisson","o peixe"],["le fruit","a fruta"],["la pomme","a maçã"],["le riz","o arroz"],["l'œuf","o ovo"],["la soupe","a sopa"]]},
+      {id:"maison", fr:"Maison et ville", items:[["la maison","a casa"],["la cuisine","a cozinha"],["la chambre","o quarto"],["la salle de bain","a casa de banho"],["la porte","a porta"],["la fenêtre","a janela"],["la table","a mesa"],["la chaise","a cadeira"],["le lit","a cama"],["la clé","a chave"],["la voiture","o carro"],["la rue","a rua"]]},
+      {id:"verbes", fr:"Verbes utiles", items:[["être (identité)","ser"],["être (état, lieu)","estar"],["avoir","ter"],["aller","ir"],["faire","fazer"],["vouloir","querer"],["pouvoir","poder"],["parler","falar"],["manger","comer"],["boire","beber"],["travailler","trabalhar"],["aimer / apprécier","gostar"]]},
+      {id:"phrases", fr:"Phrases du quotidien", items:[["Où se trouve… ?","Onde fica…?"],["Combien ça coûte ?","Quanto custa?"],["Je ne comprends pas","Não percebo"],["Pouvez-vous répéter ?","Pode repetir?"],["Parlez-vous français ?","Fala francês?"],["J'ai besoin d'aide","Preciso de ajuda"],["Je m'appelle…","Chamo-me…"],["Je suis français","Sou francês"],["J'ai faim","Tenho fome"],["J'ai soif","Tenho sede"],["Je suis fatigué","Estou cansado"],["Où sont les toilettes ?","Onde é a casa de banho?"]]},
+      {id:"temps", fr:"Jours et temps", items:[["lundi","segunda-feira"],["vendredi","sexta-feira"],["dimanche","domingo"],["aujourd'hui","hoje"],["demain","amanhã"],["hier","ontem"],["le matin","a manhã"],["la nuit","a noite"],["la semaine","a semana"],["le mois","o mês"],["l'année","o ano"],["maintenant","agora"]]}
+    ]},
+    {tag:"A2", cats:[
+      {id:"travail", fr:"Travail", items:[["le travail","o trabalho"],["l'usine","a fábrica"],["le chef","o chefe"],["le collègue","o colega"],["la réunion","a reunião"],["l'horaire","o horário"],["le poste (équipe)","o turno"],["le contrat","o contrato"],["le salaire","o salário"],["les vacances","as férias"]]},
+      {id:"sante", fr:"Corps et santé", items:[["la tête","a cabeça"],["le bras","o braço"],["la jambe","a perna"],["la main","a mão"],["le médecin","o médico"],["la pharmacie","a farmácia"],["la douleur","a dor"],["J'ai mal à la tête","Dói-me a cabeça"],["être malade","estar doente"],["la fièvre","a febre"]]},
+      {id:"courses", fr:"Courses et argent", items:[["le magasin","a loja"],["le supermarché","o supermercado"],["le prix","o preço"],["pas cher","barato"],["cher","caro"],["payer","pagar"],["l'argent","o dinheiro"],["la monnaie rendue","o troco"],["le reçu","o recibo"],["le sac","o saco"]]},
+      {id:"transport", fr:"Transports", items:[["le bus","o autocarro"],["le train","o comboio"],["le billet","o bilhete"],["la gare","a estação"],["l'aéroport","o aeroporto"],["la route","a estrada"],["l'essence","a gasolina"],["se garer","estacionar"],["à gauche","à esquerda"],["à droite","à direita"]]}
+    ]},
+    {tag:"B1", cats:[
+      {id:"phrases2", fr:"Phrases complètes", items:[["Je pense que oui","Acho que sim"],["Je n'en suis pas sûr","Não tenho a certeza"],["Demain, je vais voyager","Amanhã vou viajar"],["Hier, je suis allé au marché","Ontem fui ao mercado"],["Je voudrais réserver une table","Gostaria de reservar uma mesa"],["Pouvez-vous m'aider, s'il vous plaît ?","Pode ajudar-me, por favor?"],["Depuis combien de temps vivez-vous ici ?","Há quanto tempo vive aqui?"],["Je cherche un emploi","Estou à procura de emprego"],["Je dois prendre rendez-vous","Preciso de marcar uma consulta"],["Pourriez-vous parler plus lentement ?","Podia falar mais devagar?"]]},
+      {id:"admin", fr:"Vie pratique", items:[["la location","o aluguer"],["le propriétaire","o senhorio"],["le loyer","a renda"],["la facture","a fatura"],["l'assurance","o seguro"],["l'adresse","a morada"],["la réclamation","a reclamação"],["la commande","a encomenda"],["le délai","o prazo"],["la demande","o pedido"]]},
+      {id:"connect", fr:"Connecteurs", items:[["mais","mas"],["parce que","porque"],["c'est pourquoi","por isso"],["cependant","no entanto"],["bien que","embora"],["en outre","além disso"],["peut-être","talvez"],["toujours","sempre"],["jamais","nunca"],["encore","ainda"]]},
+      {id:"expr", fr:"Expressions et politesse", items:[["Bien sûr","Com certeza"],["Je suis content","Fico contente"],["Bonne journée","Tenha um bom dia"],["Bon voyage","Boa viagem"],["Félicitations","Parabéns"],["Santé !","Saúde!"],["Quel dommage","Que pena"],["Ce n'est pas grave","Não faz mal"],["Ce sera pour la prochaine fois","Fica para a próxima"],["Je vois","Estou a ver"]]}
+    ]}
+  ]},
+  en: { label:"English", short:"EN", voice:"en-GB", sub:"Anglais britannique", levels:[
+    {tag:"A1", cats:[
+      {id:"salut", fr:"Salutations", items:[["Bonjour","Good morning"],["Bon après-midi","Good afternoon"],["Bonsoir","Good evening"],["Salut","Hello"],["Au revoir","Goodbye"],["À plus tard","See you later"],["Merci","Thank you"],["S'il vous plaît","Please"],["Excusez-moi / Désolé","Sorry"],["De rien","You're welcome"],["Comment allez-vous ?","How are you?"],["Enchanté","Nice to meet you"]]},
+      {id:"nombres", fr:"Nombres", items:[["un","one"],["deux","two"],["trois","three"],["quatre","four"],["cinq","five"],["six","six"],["sept","seven"],["huit","eight"],["neuf","nine"],["dix","ten"],["vingt","twenty"],["cent","a hundred"]]},
+      {id:"famille", fr:"Famille", items:[["la mère","mother"],["le père","father"],["le frère","brother"],["la sœur","sister"],["le fils","son"],["la fille","daughter"],["la grand-mère","grandmother"],["le grand-père","grandfather"],["le mari","husband"],["la femme (épouse)","wife"],["l'ami","friend"],["l'enfant","child"]]},
+      {id:"manger", fr:"Manger et boire", items:[["le pain","bread"],["l'eau","water"],["le lait","milk"],["le café","coffee"],["le fromage","cheese"],["la viande","meat"],["le poisson","fish"],["le fruit","fruit"],["la pomme","apple"],["le riz","rice"],["l'œuf","egg"],["la soupe","soup"]]},
+      {id:"maison", fr:"Maison et ville", items:[["la maison","house"],["la cuisine","kitchen"],["la chambre","bedroom"],["la salle de bain","bathroom"],["la porte","door"],["la fenêtre","window"],["la table","table"],["la chaise","chair"],["le lit","bed"],["la clé","key"],["la voiture","car"],["la rue","street"]]},
+      {id:"verbes", fr:"Verbes utiles", items:[["être","to be"],["avoir","to have"],["aller","to go"],["faire","to do / to make"],["vouloir","to want"],["pouvoir","can / to be able to"],["parler","to speak"],["manger","to eat"],["boire","to drink"],["travailler","to work"],["aimer","to like"],["comprendre","to understand"]]},
+      {id:"phrases", fr:"Phrases du quotidien", items:[["Où est… ?","Where is…?"],["Combien ça coûte ?","How much is it?"],["Je ne comprends pas","I don't understand"],["Pouvez-vous répéter ?","Can you repeat that, please?"],["Parlez-vous français ?","Do you speak French?"],["J'ai besoin d'aide","I need help"],["Je m'appelle…","My name is…"],["Je viens de France","I'm from France"],["J'ai faim","I'm hungry"],["J'ai soif","I'm thirsty"],["Je suis fatigué","I'm tired"],["Où sont les toilettes ?","Where is the toilet?"]]},
+      {id:"temps", fr:"Jours et temps", items:[["lundi","Monday"],["vendredi","Friday"],["dimanche","Sunday"],["aujourd'hui","today"],["demain","tomorrow"],["hier","yesterday"],["le matin","morning"],["la nuit","night"],["la semaine","week"],["le mois","month"],["l'année","year"],["maintenant","now"]]}
+    ]},
+    {tag:"A2", cats:[
+      {id:"travail", fr:"Travail", items:[["le travail","work"],["l'usine","factory"],["le chef","boss"],["le collègue","colleague"],["la réunion","meeting"],["l'horaire","schedule"],["le poste (équipe)","shift"],["le contrat","contract"],["le salaire","salary"],["les vacances","holiday"]]},
+      {id:"sante", fr:"Corps et santé", items:[["la tête","head"],["le bras","arm"],["la jambe","leg"],["la main","hand"],["le médecin","doctor"],["la pharmacie","pharmacy"],["la douleur","pain"],["J'ai mal à la tête","I have a headache"],["être malade","to be ill"],["la fièvre","fever"]]},
+      {id:"courses", fr:"Courses et argent", items:[["le magasin","shop"],["le supermarché","supermarket"],["le prix","price"],["pas cher","cheap"],["cher","expensive"],["payer","to pay"],["l'argent","money"],["la monnaie rendue","change"],["le reçu","receipt"],["le sac","bag"]]},
+      {id:"transport", fr:"Transports", items:[["le bus","bus"],["le train","train"],["le billet","ticket"],["la gare","station"],["l'aéroport","airport"],["la route","road"],["l'essence","petrol"],["se garer","to park"],["à gauche","left"],["à droite","right"]]}
+    ]},
+    {tag:"B1", cats:[
+      {id:"phrases2", fr:"Phrases complètes", items:[["Je pense que oui","I think so"],["Je n'en suis pas sûr","I'm not sure"],["Demain, je vais voyager","I'm going to travel tomorrow"],["Hier, je suis allé au marché","Yesterday I went to the market"],["Je voudrais réserver une table","I'd like to book a table"],["Pourriez-vous m'aider, s'il vous plaît ?","Could you help me, please?"],["Depuis combien de temps vivez-vous ici ?","How long have you lived here?"],["Je cherche un emploi","I'm looking for a job"],["Je dois prendre rendez-vous","I need to make an appointment"],["Pourriez-vous parler plus lentement ?","Could you speak more slowly?"]]},
+      {id:"admin", fr:"Vie pratique", items:[["la location","rental"],["le propriétaire","landlord"],["le loyer","rent"],["la facture","bill"],["l'assurance","insurance"],["l'adresse","address"],["la réclamation","complaint"],["la commande","order"],["le délai","deadline"],["faire une demande","to apply"]]},
+      {id:"connect", fr:"Connecteurs", items:[["mais","but"],["parce que","because"],["donc","so"],["cependant","however"],["bien que","although"],["en outre","moreover"],["peut-être","maybe"],["toujours","always"],["jamais","never"],["encore","still"]]},
+      {id:"expr", fr:"Expressions et politesse", items:[["Bien sûr","Of course"],["Je suis content","I'm glad"],["Bonne journée","Have a nice day"],["Bon voyage","Have a good trip"],["Félicitations","Congratulations"],["Santé !","Cheers!"],["Quel dommage","What a shame"],["Ce n'est pas grave","Never mind"],["Ce sera pour la prochaine fois","Maybe next time"],["Je vois","I see"]]}
+    ]}
+  ]}
+};
+
+/* Liste à plat : {fr, t, lv, cat} */
+const ITEMS = {};
+for (const k of Object.keys(DATA)) {
+  ITEMS[k] = DATA[k].levels.flatMap((L, lv) => L.cats.flatMap(c => c.items.map(([fr, t]) => ({ fr, t, lv, cat: c.id }))));
+}
+const MASTERED = 3;     // boîte à partir de laquelle un mot est « maîtrisé »
+const UNLOCK = 0.75;    // part de mots maîtrisés pour débloquer le niveau suivant
+
+/* ---------- Profils et progression (stockés sur cet appareil) ---------- */
+const KEY = "famille-langues-v2";
+let db = { cur: "Moi", p: { Moi: { pt: {}, en: {} } } };
+try {
+  const raw = localStorage.getItem(KEY);
+  if (raw) db = JSON.parse(raw);
+  else {
+    const old = localStorage.getItem("famille-langues-v1");
+    if (old) db.p.Moi = Object.assign({ pt: {}, en: {} }, JSON.parse(old));
+  }
+} catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+const prof = () => (db.p[db.cur] = db.p[db.cur] || { pt: {}, en: {} });
+const box = (lang, t) => (prof()[lang] && prof()[lang][t]) || 0;
+function bump(lang, t, ok) {
+  prof()[lang] = prof()[lang] || {};
+  prof()[lang][t] = ok ? Math.min(4, box(lang, t) + 1) : 0;
+  save();
+}
+const levelItems = (lang, lv) => ITEMS[lang].filter(x => x.lv === lv);
+const levelPct = (lang, lv) => { const it = levelItems(lang, lv); return it.filter(x => box(lang, x.t) >= MASTERED).length / it.length; };
+const unlocked = (lang, lv) => lv === 0 || levelPct(lang, lv - 1) >= UNLOCK;
+const curLevel = lang => { let l = 0; while (l + 1 < DATA[lang].levels.length && unlocked(lang, l + 1)) l++; return l; };
+const tag = (lang, lv) => DATA[lang].levels[lv].tag;
+
+/* ---------- Outils ---------- */
+const $app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pct = x => Math.round(100 * x);
+/* Voix : la qualité dépend de l'appareil. On classe les voix et on laisse chacun choisir. */
+const VKEY = "famille-voix-v1";
+let vpref = {};
+try { vpref = JSON.parse(localStorage.getItem(VKEY) || "{}"); } catch (e) {}
+function voicesFor(lang) {
+  try { const p = DATA[lang].voice.slice(0, 2); return window.speechSynthesis.getVoices().filter(v => v.lang.toLowerCase().startsWith(p)); } catch (e) { return []; }
+}
+function vScore(v, lang) {
+  const n = v.name.toLowerCase(); let s = 0;
+  if (v.lang.toLowerCase().replace("_", "-") === DATA[lang].voice.toLowerCase()) s += 5;
+  if (/natural|neural|online|premium|enhanced|siri|wavenet/.test(n)) s += 4;
+  if (/google/.test(n)) s += 2;
+  if (!v.localService) s += 1;
+  return s;
+}
+const rankedVoices = lang => voicesFor(lang).sort((a, b) => vScore(b, lang) - vScore(a, lang));
+function bestVoice(lang) { const l = rankedVoices(lang); return l.find(v => v.name === vpref[lang]) || l[0]; }
+function speak(text, lang) {
+  try {
+    const synth = window.speechSynthesis; if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/…/g, ""));
+    u.lang = DATA[lang].voice; u.rate = 0.9;
+    const v = bestVoice(lang); if (v) { u.voice = v; u.lang = v.lang; }
+    synth.speak(u);
+  } catch (e) {}
+}
+function fillVoices() {
+  const sel = document.getElementById("voice"); if (!sel || !S.lang) return;
+  const list = rankedVoices(S.lang), best = bestVoice(S.lang);
+  sel.innerHTML = list.length ? list.map(v => `<option value="${esc(v.name)}" ${best && v.name === best.name ? "selected" : ""}>${esc(v.name)} (${esc(v.lang)})</option>`).join("") : `<option>Aucune voix trouvée sur cet appareil</option>`;
+  sel.onchange = () => { vpref[S.lang] = sel.value; try { localStorage.setItem(VKEY, JSON.stringify(vpref)); } catch (e) {} };
+}
+/* Réponse écrite : sans accents, sans ponctuation, article facultatif, variantes séparées par « / » */
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[…?!.,;:]/g, "").replace(/\s+/g, " ").trim();
+function accepted(t) {
+  const set = new Set();
+  t.split("/").forEach(a => { const n = norm(a); set.add(n); set.add(n.replace(/^(o|a|os|as|to|the)\s+/, "")); });
+  return set;
+}
+
+const S = { lang: null, lv: 0, cat: "all" };
+
+/* ---------- Accueil ---------- */
+function home() {
+  S.lang = null;
+  const names = Object.keys(db.p);
+  $app.innerHTML = `
+    <div><h1>Apprendre en famille</h1><p class="muted">Portugais et anglais. Les exercices deviennent plus difficiles quand ton niveau monte.</p></div>
+    <div class="card" style="display:grid;gap:10px">
+      <span class="muted">Qui apprend ?</span>
+      <div class="chips" role="group" aria-label="Profil">${names.map(n => `<button class="chip" data-p="${esc(n)}" aria-pressed="${n === db.cur}">${esc(n)}</button>`).join("")}</div>
+      <form class="addrow" id="addp"><input class="field" id="newp" maxlength="16" placeholder="Nouveau prénom" aria-label="Nouveau prénom" autocomplete="off"><button class="btn" type="submit">Ajouter</button></form>
+    </div>
+    <div class="langs">${Object.keys(DATA).map(k => {
+      const lv = curLevel(k), p = levelPct(k, lv);
+      return `<button class="lang" data-lang="${k}">
+        <span class="badge">${DATA[k].short}</span>
+        <span style="flex:1"><b>${DATA[k].label}<span class="lvl">${tag(k, lv)}</span></b><span class="muted">${DATA[k].sub}</span>
+        <span class="bar"><i style="width:${pct(p)}%"></i></span>
+        <span class="prog">Niveau ${tag(k, lv)} : ${pct(p)} % maîtrisé</span></span></button>`; }).join("")}
+    </div>
+    <p class="note">La progression est enregistrée sur cet appareil, séparément pour chaque prénom.</p>`;
+  $app.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { db.cur = b.dataset.p; save(); home(); });
+  document.getElementById("addp").onsubmit = e => {
+    e.preventDefault();
+    const n = document.getElementById("newp").value.trim();
+    if (!n) return;
+    if (!db.p[n]) db.p[n] = { pt: {}, en: {} };
+    db.cur = n; save(); home();
+  };
+  $app.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { S.lv = curLevel(b.dataset.lang); S.cat = "all"; menu(b.dataset.lang); });
+}
+
+/* ---------- Menu d'une langue ---------- */
+function menu(lang) {
+  S.lang = lang;
+  const D = DATA[lang], lv = S.lv, cur = curLevel(lang);
+  const cats = D.levels[lv].cats;
+  $app.innerHTML = `
+    <div class="top"><button class="back" id="back">← Accueil</button><span class="prog">${esc(db.cur)} · ${D.label}</span></div>
+    <button class="mode" id="adapt"><b>Parcours adaptatif</b><span>Niveau ${tag(lang, cur)} · les questions s'adaptent à chaque mot</span></button>
+    <div class="card" style="display:grid;gap:10px">
+      <span class="muted">Ou choisis ton exercice : niveau</span>
+      <div class="chips" role="group" aria-label="Niveau">${D.levels.map((L, i) => {
+        const ok = unlocked(lang, i);
+        return `<button class="chip" data-lv="${i}" aria-pressed="${i === lv}" ${ok ? "" : "disabled"}>${ok ? "" : "🔒 "}${L.tag}${ok ? ` <span class="prog">${pct(levelPct(lang, i))} %</span>` : ""}</button>`; }).join("")}</div>
+      ${cur + 1 < D.levels.length && lv === 0 ? "" : ""}
+      <div class="chips" role="group" aria-label="Thème">
+        <button class="chip" data-cat="all" aria-pressed="${S.cat === "all"}">Tout le niveau</button>
+        ${cats.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${S.cat === c.id}">${c.fr}</button>`).join("")}
+      </div>
+      <div class="modes">
+        <button class="mode alt" data-mode="speak"><b>Prononciation</b><span>Le mot est en français, dis-le dans la langue apprise</span></button>
+        <button class="mode alt" data-mode="cards"><b>Cartes mémoire</b><span>Retourne la carte, écoute, dis si tu le savais</span></button>
+        <button class="mode alt" data-mode="choice"><b>Quiz</b><span>10 questions à choix multiples</span></button>
+        <button class="mode alt" data-mode="listen"><b>Écoute</b><span>Écoute le mot, trouve le sens en français</span></button>
+        <button class="mode alt" data-mode="type"><b>Écrire</b><span>Tape la traduction toi-même</span></button>
+      </div>
+      <p class="prog">${cur + 1 < D.levels.length ? `Niveau ${tag(lang, cur + 1)} : maîtrise ${pct(UNLOCK)} % du niveau ${tag(lang, cur)} pour le débloquer.` : "Tu es au niveau le plus avancé."}</p>
+    </div>
+    <div class="card" style="display:grid;gap:8px">
+      <label class="muted" for="voice">Voix (change-la si elle sonne mal)</label>
+      <select class="field" id="voice" style="padding:10px 12px;font-size:1rem"></select>
+      <button class="speak" id="vtest" style="justify-self:start">🔊 Tester la voix</button>
+      <p class="prog">Les meilleures voix (« Natural », « Google », « Siri ») sont proposées en premier. Sur Android et Chrome, installe les voix dans les réglages de synthèse vocale.</p>
+    </div>`;
+  fillVoices();
+  document.getElementById("vtest").onclick = () => speak(D.levels[0].cats[0].items[0][1], lang);
+  document.getElementById("back").onclick = home;
+  document.getElementById("adapt").onclick = () => runSession(lang, buildAdaptive, "adapt");
+  $app.querySelectorAll("[data-lv]").forEach(b => b.onclick = () => { S.lv = +b.dataset.lv; S.cat = "all"; menu(lang); });
+  $app.querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { S.cat = b.dataset.cat; menu(lang); });
+  $app.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => runSession(lang, () => buildManual(lang, b.dataset.mode), b.dataset.mode));
+}
+
+/* ---------- Construction des séries ---------- */
+/* Plus le mot est connu, plus l'exercice est exigeant : choix FR→langue, choix langue→FR, écoute, puis écriture */
+const kindFor = b => b === 0 ? "choice" : b === 1 ? "choice-rev" : b === 2 ? "listen" : "type";
+function buildAdaptive(lang) {
+  const cur = curLevel(lang);
+  const cand = ITEMS[lang].filter(x => x.lv <= cur)
+    .map(x => ({ x, s: box(lang, x.t) + Math.random() * 1.2 - (x.lv === cur ? 0.3 : 0) }))
+    .sort((a, b) => a.s - b.s).slice(0, 10).map(o => o.x);
+  return shuffle(cand).map(x => ({ x, kind: kindFor(box(lang, x.t)) }));
+}
+function buildManual(lang, mode) {
+  const pool = ITEMS[lang].filter(x => x.lv === S.lv && (S.cat === "all" || x.cat === S.cat));
+  const pick = shuffle(pool).sort((a, b) => box(lang, a.t) - box(lang, b.t)).slice(0, 10);
+  return shuffle(pick).map(x => ({ x, kind: mode === "cards" ? "card" : mode }));
+}
+function distractors(lang, x, hard) {
+  const base = ITEMS[lang].filter(y => y.t !== x.t && y.fr !== x.fr);
+  const same = shuffle(base.filter(y => y.cat === x.cat && y.lv === x.lv));
+  const rest = shuffle(base.filter(y => !(y.cat === x.cat && y.lv === x.lv)));
+  return (hard ? [...same, ...rest] : [...shuffle(base.filter(y => y.lv <= x.lv))]).slice(0, 3);
+}
+
+/* ---------- Prononciation : similarité entre ce qui est entendu et le mot attendu ---------- */
+function lev(a, b) {
+  const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i].concat(Array(n).fill(0)));
+  for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[m][n];
+}
+const sim = (a, b) => { const L = Math.max(a.length, b.length); return L ? 1 - lev(a, b) / L : 1; };
+const NUMW = {
+  pt: { 0: "zero", 1: "um", 2: "dois", 3: "tres", 4: "quatro", 5: "cinco", 6: "seis", 7: "sete", 8: "oito", 9: "nove", 10: "dez", 20: "vinte", 100: "cem" },
+  en: { 0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten", 20: "twenty", 100: "hundred" }
+};
+function heardScore(lang, x, heard) {
+  const variants = [...accepted(x.t)];
+  let best = 0;
+  heard.forEach(h => {
+    let n = norm(h); if (/^\d+$/.test(n) && NUMW[lang][n]) n = NUMW[lang][n];
+    variants.forEach(v => { best = Math.max(best, sim(n, v)); });
+  });
+  return best;
+}
+
+/* ---------- Déroulé d'une série ---------- */
+function runSession(lang, build, mode) {
+  const entries = build(lang), startLv = curLevel(lang);
+  let i = 0, score = 0;
+  const kindLabel = { card: "Carte", choice: "Quiz", "choice-rev": "Quiz inversé", listen: "Écoute", type: "Écriture", speak: "Prononciation" };
+
+  const end = () => {
+    const nowLv = curLevel(lang), up = nowLv > startLv;
+    $app.innerHTML = `<div class="card" style="display:grid;gap:12px;text-align:center">
+      <h2>${score >= 8 ? "Excellent !" : score >= 5 ? "Bien joué !" : "On continue !"}</h2>
+      <div class="score">${score} / ${entries.length}</div>
+      ${up ? `<p class="note up">Niveau ${tag(lang, nowLv)} débloqué ! Les exercices sont plus difficiles.</p>` : `<p class="muted">Niveau ${tag(lang, nowLv)} : ${pct(levelPct(lang, nowLv))} % maîtrisé</p>`}
+      <div class="row"><button class="btn" id="again">Rejouer</button><button class="btn ghost" id="m">Menu</button></div></div>`;
+    document.getElementById("again").onclick = () => runSession(lang, build, mode);
+    document.getElementById("m").onclick = () => { S.lv = Math.max(S.lv, 0); menu(lang); };
+  };
+  const head = () => `<div class="top"><button class="back" id="m">← Menu</button><span class="prog">${i + 1} / ${entries.length}</span></div>`;
+  const afterBlock = (ok, x, extra) => `
+    <p class="note">${ok ? "Correct." : "Raté."} <b>${esc(x.t)}</b> = ${esc(x.fr)}${extra || ""}</p>
+    <div class="row" style="margin-top:10px"><button class="speak" id="say2">🔊 Écouter</button><button class="btn" id="next">${i + 1 < entries.length ? "Suivant" : "Voir le score"}</button></div>`;
+  const wireAfter = x => {
+    document.getElementById("say2").onclick = () => speak(x.t, lang);
+    const n = document.getElementById("next"); n.onclick = () => { i++; step(); }; n.focus();
+  };
+
+  const step = () => {
+    if (i >= entries.length) return end();
+    const { x, kind } = entries[i], b = box(lang, x.t);
+    if (kind === "card") return cardStep(x);
+    if (kind === "type") return typeStep(x, b);
+    if (kind === "speak") return speakStep(x);
+    choiceStep(x, kind, b);
+  };
+
+  function speakStep(x) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let scored = false, rec = null, listening = false;
+    $app.innerHTML = `${head()}
+      <div class="card" style="display:grid;gap:12px"><span class="kind">Prononciation</span>
+        <p class="muted">Dis à voix haute en ${DATA[lang].label} :</p><p class="prompt">${esc(x.fr)}</p>
+        <div id="model"></div></div>
+      ${SR ? `<button class="mode" id="mic" style="text-align:center"><b>🎤 Parler</b><span>Touche, puis dis le mot</span></button>`
+           : `<p class="note">Ton navigateur ne gère pas la reconnaissance vocale. Utilise Chrome, Edge ou Safari.</p>`}
+      <div id="res" aria-live="polite"></div>
+      <div class="row"><button class="btn ghost" id="reveal">Voir la réponse</button><button class="btn ghost" id="skip">${i + 1 < entries.length ? "Mot suivant" : "Voir le score"}</button></div>`;
+    const reveal = () => {
+      document.getElementById("model").innerHTML = `<p class="note">Réponse : <b>${esc(x.t)}</b></p><div style="margin-top:8px"><button class="speak" id="say">🔊 Écouter le modèle</button></div>`;
+      document.getElementById("say").onclick = () => speak(x.t, lang);
+      document.getElementById("reveal").style.display = "none";
+      speak(x.t, lang);
+    };
+    document.getElementById("m").onclick = () => { try { rec && rec.abort(); } catch (e) {} menu(lang); };
+    document.getElementById("reveal").onclick = () => { if (!scored) bump(lang, x.t, false); reveal(); };
+    document.getElementById("skip").onclick = () => { try { rec && rec.abort(); } catch (e) {} i++; step(); };
+    if (!SR) return;
+    const mic = document.getElementById("mic"), res = document.getElementById("res");
+    const say = (cls, html) => { res.innerHTML = `<p class="note ${cls}">${html}</p>`; };
+    mic.onclick = () => {
+      if (listening) { try { rec.stop(); } catch (e) {} return; }
+      try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+      rec = new SR(); rec.lang = DATA[lang].voice; rec.interimResults = false; rec.maxAlternatives = 5; rec.continuous = false;
+      rec.onstart = () => { listening = true; mic.querySelector("b").textContent = "🎤 Je t'écoute…"; mic.querySelector("span").textContent = "Parle maintenant"; res.innerHTML = ""; };
+      rec.onend = () => { listening = false; mic.querySelector("b").textContent = "🎤 Réessayer"; mic.querySelector("span").textContent = "Touche, puis dis le mot"; };
+      rec.onerror = e => {
+        const err = e.error;
+        if (err === "not-allowed" || err === "service-not-allowed") say("", "Le micro est bloqué. Autorise le micro pour cette page. Si tu es dans l'aperçu Claude, ouvre le fichier index.html directement dans Chrome ou Safari.");
+        else if (err === "no-speech") say("", "Je n'ai rien entendu. Rapproche-toi du micro et réessaie.");
+        else if (err === "network") say("", "Pas de connexion : la reconnaissance vocale a besoin d'internet.");
+        else if (err !== "aborted") say("", "Erreur de reconnaissance (" + esc(err) + "). Réessaie.");
+      };
+      rec.onresult = e => {
+        const heard = Array.from(e.results[0]).map(a => a.transcript);
+        const s = heardScore(lang, x, heard);
+        const good = s >= 0.85, near = s >= 0.65;
+        if (good && !scored) { scored = true; score++; bump(lang, x.t, true); }
+        say(good ? "up" : "", `${good ? "Parfait !" : near ? "Presque. Réessaie en articulant." : "Pas encore. Réessaie, ou touche « Voir la réponse »."}<br><span class="muted">J'ai entendu : « ${esc(heard[0])} »</span>`);
+        if (good) reveal();
+      };
+      try { rec.start(); } catch (err) { say("", "Impossible de démarrer le micro. Réessaie."); }
+    };
+  }
+
+  function cardStep(x) {
+    let flipped = false;
+    const draw = () => {
+      $app.innerHTML = `${head()}
+        <button class="flash" id="flip" aria-label="Retourner la carte">
+          ${flipped
+            ? `<span class="tap">${DATA[lang].label}</span><span class="big">${esc(x.t)}</span><span class="muted">${esc(x.fr)}</span>`
+            : `<span class="tap">Comment dit-on ?</span><span class="big">${esc(x.fr)}</span><span class="tap">Touche pour retourner</span>`}
+        </button>
+        ${flipped ? `<div style="text-align:center"><button class="speak" id="say">🔊 Écouter</button></div>
+          <div class="row"><button class="btn bad" id="no">À revoir</button><button class="btn good" id="yes">Je le savais</button></div>` : ""}`;
+      document.getElementById("m").onclick = () => menu(lang);
+      document.getElementById("flip").onclick = () => { if (!flipped) { flipped = true; draw(); speak(x.t, lang); } };
+      if (flipped) {
+        document.getElementById("say").onclick = () => speak(x.t, lang);
+        const next = ok => { bump(lang, x.t, ok); if (ok) score++; i++; step(); };
+        document.getElementById("yes").onclick = () => next(true);
+        document.getElementById("no").onclick = () => next(false);
+      }
+    };
+    draw();
+  }
+
+  function choiceStep(x, kind, b) {
+    const rev = kind === "choice-rev", listen = kind === "listen";
+    const opts = shuffle([x, ...distractors(lang, x, b >= 1)]);
+    const showFr = rev || listen;    // les réponses sont en français
+    const promptHtml = listen
+      ? `<p class="muted">Que veut dire ce que tu entends ?</p><div><button class="speak" id="say">🔊 Réécouter</button></div>`
+      : rev ? `<p class="muted">Que veut dire ?</p><p class="prompt">${esc(x.t)}</p>`
+            : `<p class="muted">Comment dit-on en ${DATA[lang].label} ?</p><p class="prompt">${esc(x.fr)}</p>`;
+    $app.innerHTML = `${head()}
+      <div class="card" style="display:grid;gap:12px"><span class="kind">${kindLabel[kind]}</span>${promptHtml}</div>
+      <div class="opts">${opts.map((o, k) => `<button class="opt" data-k="${k}">${esc(showFr ? o.fr : o.t)}</button>`).join("")}</div>
+      <div id="after"></div>`;
+    document.getElementById("m").onclick = () => menu(lang);
+    if (listen) { document.getElementById("say").onclick = () => speak(x.t, lang); speak(x.t, lang); }
+    if (rev) speak(x.t, lang);
+    const buttons = [...$app.querySelectorAll(".opt")];
+    buttons.forEach(btn => btn.onclick = () => {
+      const ok = opts[+btn.dataset.k].t === x.t;
+      buttons.forEach((y, k) => { y.disabled = true; if (opts[k].t === x.t) y.classList.add("ok"); });
+      if (!ok) btn.classList.add("ko"); else score++;
+      bump(lang, x.t, ok);
+      document.getElementById("after").innerHTML = afterBlock(ok, x);
+      wireAfter(x);
+    });
+  }
+
+  function typeStep(x, b) {
+    $app.innerHTML = `${head()}
+      <div class="card" style="display:grid;gap:12px"><span class="kind">Écriture</span>
+        <p class="muted">Écris en ${DATA[lang].label} :</p><p class="prompt">${esc(x.fr)}</p></div>
+      <form id="f" style="display:grid;gap:10px">
+        <input class="field" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Ta réponse" placeholder="Ta réponse">
+        <div class="row"><button class="btn" type="submit">Valider</button><button class="btn ghost" type="button" id="idk">Je ne sais pas</button></div>
+      </form>
+      <div id="after"></div>`;
+    document.getElementById("m").onclick = () => menu(lang);
+    const inp = document.getElementById("ans"); inp.focus();
+    let done = false;
+    const finish = given => {
+      if (done) return; done = true;
+      const ok = given !== null && accepted(x.t).has(norm(given));
+      const exact = ok && given.trim().toLowerCase().replace(/[…?!.,;:]/g, "") !== x.t.toLowerCase().replace(/[…?!.,;:]/g, "") && !x.t.includes("/") && norm(given) === norm(x.t);
+      inp.disabled = true; inp.classList.add(ok ? "ok" : "ko");
+      document.querySelector("#f .row").style.display = "none";
+      if (ok) score++;
+      bump(lang, x.t, ok);
+      document.getElementById("after").innerHTML = afterBlock(ok, x, exact ? "<br>Attention à l'orthographe exacte." : "");
+      speak(x.t, lang);
+      wireAfter(x);
+    };
+    document.getElementById("f").onsubmit = e => { e.preventDefault(); finish(inp.value); };
+    document.getElementById("idk").onclick = () => finish(null);
+  }
+  step();
+}
+
+home();
+try { window.speechSynthesis && (window.speechSynthesis.onvoiceschanged = fillVoices); } catch (e) {}
+</script>
+</body>
+</html>
