@@ -221,6 +221,7 @@ function accepted(t) {
 }
 
 const S = { lang: null, lv: 0, cat: "all" };
+let srAltEn = false;   // reconnaissance anglaise : false = en-GB, true = en-US
 
 /* ---------- Accueil ---------- */
 function home() {
@@ -411,11 +412,16 @@ function runSession(lang, build, mode) {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     let scored = false, helped = false, rec = null, listening = false;
     const IDLE = "Touche, attends « Parle maintenant », puis dis le mot";
+    /* Anglais : les mots courts isolés sont souvent ignorés par la reconnaissance du téléphone */
+    const longer = lang === "en";
+    const bare = x.t.split("/")[0].trim().replace(/^(to|the)\s+/i, "");
+    const shortHint = longer && !/\s/.test(bare) && bare.length <= 5
+      ? `<p class="prog" style="text-align:center">Mot court : dis-le deux fois de suite pour qu'il soit mieux entendu.</p>` : "";
     $app.innerHTML = `${head()}
       <div class="card" style="display:grid;gap:12px"><span class="kind">Prononciation</span>
         <p class="muted">Dis à voix haute en ${DATA[lang].label} :</p><p class="prompt">${esc(x.fr)}</p>
         <div id="model"></div></div>
-      ${SR ? `<button class="mode" id="mic" style="text-align:center"><b>🎤 Parler</b><span>${IDLE}</span></button>`
+      ${SR ? `<button class="mode" id="mic" style="text-align:center"><b>🎤 Parler</b><span>${IDLE}</span></button>${shortHint}`
            : `<p class="note">Ton navigateur ne gère pas la reconnaissance vocale. Utilise Chrome, Edge ou Safari.</p>`}
       <div id="res" aria-live="polite"></div>
       <div class="row"><button class="btn ghost" id="reveal">Voir la réponse</button><button class="btn ghost" id="skip">${i + 1 < entries.length ? "Mot suivant" : "Voir le score"}</button></div>`;
@@ -441,8 +447,13 @@ function runSession(lang, build, mode) {
     mic.onclick = () => {
       if (listening) { try { rec.stop(); } catch (e) {} return; }
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
-      const heard = []; let done = false, errShown = false;
-      rec = new SR(); rec.lang = DATA[lang].voice; rec.interimResults = true; rec.maxAlternatives = 5; rec.continuous = false;
+      const heard = []; let done = false, errShown = false, quiet = null, cap = null;
+      rec = new SR(); rec.interimResults = true; rec.maxAlternatives = 5;
+      /* Anglais : si rien n'a été entendu, on alterne entre reconnaissance britannique et américaine */
+      rec.lang = longer && srAltEn ? "en-US" : DATA[lang].voice;
+      /* Anglais : écoute continue, arrêtée 1,5 s après le dernier mot (8 s au plus) */
+      rec.continuous = longer;
+      const stopSoon = ms => { clearTimeout(quiet); quiet = setTimeout(() => { try { rec.stop(); } catch (e) {} }, ms); };
       const success = () => {
         done = true;
         if (!scored) { scored = true; score++; if (!helped) bump(lang, x.t, true); }
@@ -450,7 +461,10 @@ function runSession(lang, build, mode) {
         reveal();
         try { rec.stop(); } catch (e) {}
       };
-      rec.onstart = () => { listening = true; mic.querySelector("b").textContent = "🎤 Je t'écoute…"; mic.querySelector("span").textContent = "Parle maintenant"; res.innerHTML = ""; };
+      rec.onstart = () => {
+        listening = true; mic.querySelector("b").textContent = "🎤 Je t'écoute…"; mic.querySelector("span").textContent = "Parle maintenant"; res.innerHTML = "";
+        if (longer) cap = setTimeout(() => { try { rec.stop(); } catch (e) {} }, 8000);
+      };
       rec.onresult = e => {
         if (done) return;
         let live = "";
@@ -462,6 +476,7 @@ function runSession(lang, build, mode) {
         }
         if (heardScore(lang, x, heard) >= 0.85) return success();
         if (live) res.innerHTML = `<p class="muted">J'entends : « ${esc(live)} »</p>`;
+        if (longer && heard.length) stopSoon(1500);
       };
       rec.onerror = e => {
         const err = e.error;
@@ -474,9 +489,11 @@ function runSession(lang, build, mode) {
       };
       rec.onend = () => {
         listening = false; mic.querySelector("b").textContent = "🎤 Réessayer"; mic.querySelector("span").textContent = IDLE;
+        clearTimeout(quiet); clearTimeout(cap);
+        if (longer && !heard.length) srAltEn = !srAltEn;
         if (done || errShown) return;
         done = true;
-        if (!heard.length) return say("", "Je n'ai rien entendu. Attends « Parle maintenant » avant de parler, puis réessaie.", true);
+        if (!heard.length) return say("", `Je n'ai rien entendu. Attends « Parle maintenant » avant de parler, puis réessaie.${shortHint ? " Pour un mot court, dis-le deux fois." : ""}`, true);
         const s = heardScore(lang, x, heard);
         if (s >= 0.85) return success();
         say("", `${s >= 0.65 ? "Presque !" : "Pas encore."} Écoute le modèle, puis réessaie.<br><span class="muted">J'ai entendu : ${heardList(heard)}</span>`, true);
